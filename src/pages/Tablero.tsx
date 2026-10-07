@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause, Save, FileText, Download, Sun, Moon, RotateCcw, AlertTriangle, LogOut } from 'lucide-react';
+import { Play, Pause, Save, FileText, Download, CheckCircle2, Sun, Moon, RotateCcw, AlertTriangle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 const initialStats = {
   '1T': { periodTime: 0, timeA: 0, timeB: 0, passesA: 0, failsA: 0, goalsA: 0, chancesA: 0, passesB: 0, failsB: 0, goalsB: 0, chancesB: 0 },
@@ -34,7 +32,7 @@ export default function Tablero() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveTitle, setSaveTitle] = useState('');
   const [saveDesc, setSaveDesc] = useState('');
-  const [saveError, setSaveError] = useState(''); // <-- Nuevo estado para el error
+  const [saveError, setSaveError] = useState('');
   
   const langTexts = t[lang];
 
@@ -122,10 +120,10 @@ export default function Tablero() {
   };
 
   const handleSaveMatch = async () => {
-    setSaveError(''); // Limpiamos errores previos al intentar guardar
+    setSaveError('');
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/matches/guardar`, {
+      const res = await fetch('http://localhost:4000/matches/guardar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +143,6 @@ export default function Tablero() {
         navigate('/dashboard/partidos');
       } else {
         const errorData = await res.json();
-        // Asignamos el error al estado en vez de usar alert()
         setSaveError(errorData.message || "Error al guardar el partido.");
       }
     } catch (e) {
@@ -278,7 +275,7 @@ export default function Tablero() {
   };
 
   return (
-    <div className={`min-h-[100dvh] flex flex-col justify-center sm:p-4 font-sans select-none touch-manipulation transition-colors duration-300 ${bgApp}`}>
+    <div className={`min-h-[100dvh] flex flex-col sm:justify-center p-0 sm:p-4 font-sans select-none touch-manipulation transition-colors duration-300 ${bgApp}`}>
       
       {showResetModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -342,7 +339,6 @@ export default function Tablero() {
               </button>
             </div>
             
-            {/* MENSAJE DE ERROR EN ROJO INCRUSTADO */}
             {saveError && (
               <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold text-center flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-2">
                 <AlertTriangle className="w-5 h-5 shrink-0" />
@@ -353,12 +349,16 @@ export default function Tablero() {
         </div>
       )}
 
-      {/* Tarjeta Principal estirada con flex-1 */}
-      <div className={`flex flex-col w-full max-w-md mx-auto h-[100dvh] sm:h-[95dvh] sm:rounded-3xl border-0 sm:border sm:shadow-2xl transition-colors duration-300 p-4 ${bgCard}`}>
+      {/* 
+        CORRECCIÓN PRINCIPAL AQUÍ:
+        Cambiamos h-[100dvh] a min-h-[100dvh] y h-auto.
+        Ajustamos los paddings a p-2 en móviles para compactar la UI.
+      */}
+      <div className={`flex flex-col w-full max-w-md mx-auto min-h-[100dvh] sm:min-h-[95dvh] h-auto sm:rounded-3xl border-0 sm:border sm:shadow-2xl transition-colors duration-300 p-2 sm:p-4 ${bgCard}`}>
         
         {/* Cabecera, Controles Globales y Marcador */}
-        <div className="text-center mb-4 shrink-0">
-          <div className="flex justify-between items-center mb-4">
+        <div className="text-center mb-2 sm:mb-4 shrink-0 mt-1 sm:mt-0">
+          <div className="flex justify-between items-center mb-2 sm:mb-4">
             <div className="flex gap-2">
               <button 
                 onClick={() => navigate('/dashboard')}
@@ -388,7 +388,7 @@ export default function Tablero() {
             </select>
           </div>
           
-          <div className={`${bgPanel} rounded-xl p-3 border flex justify-between items-center mb-3 transition-colors`}>
+          <div className={`${bgPanel} rounded-xl p-2 sm:p-3 border flex justify-between items-center mb-2 sm:mb-3 transition-colors`}>
             {/* Marcador Equipo Local */}
             <div className="text-center w-1/3 flex flex-col items-center justify-center">
               <input 
@@ -444,7 +444,7 @@ export default function Tablero() {
               <button 
                 key={p} 
                 onClick={() => handleCambiarPeriodo(p as '1T' | '2T' | 'GLOBAL')}
-                className={`flex-1 py-2 text-xs font-bold rounded-md transition-colors ${periodo === p ? 'bg-emerald-600 text-white shadow-sm' : `${textMuted} hover:${textMain}`}`}
+                className={`flex-1 py-1.5 sm:py-2 text-xs font-bold rounded-md transition-colors ${periodo === p ? 'bg-emerald-600 text-white shadow-sm' : `${textMuted} hover:${textMain}`}`}
               >
                 {p}
               </button>
@@ -453,7 +453,7 @@ export default function Tablero() {
         </div>
 
         {/* CONTENEDOR ELÁSTICO */}
-        <div className="flex-1 flex flex-col min-h-0 mb-4">
+        <div className="flex-1 flex flex-col min-h-0 mb-2 sm:mb-4">
           {periodo === 'GLOBAL' ? (
             <div className="h-full overflow-y-auto pr-1">
               {renderStatsTable('1T', stats['1T'])}
@@ -464,7 +464,7 @@ export default function Tablero() {
             <div className="flex-1 flex flex-col min-h-0">
               <button 
                 onClick={() => setActivePossession(null)}
-                className={`w-full font-bold py-3 rounded-xl mb-3 flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0 ${
+                className={`w-full font-bold py-2 sm:py-3 rounded-xl mb-2 sm:mb-3 flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0 ${
                   isBallDead 
                     ? 'bg-amber-500/20 text-amber-600 border border-amber-500/50 shadow-inner' 
                     : btnPauseClass
@@ -473,11 +473,11 @@ export default function Tablero() {
                 <Pause className="w-5 h-5" /> {isBallDead ? langTexts.ballDead : langTexts.pauseAction}
               </button>
 
-              <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
+              <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3 min-h-0">
                 
                 {/* EQUIPO A */}
-                <div className={`${bgPanel} rounded-xl p-3 border-t-4 border-t-emerald-500 flex flex-col transition-colors min-h-0`}>
-                  <div className="text-center mb-3 shrink-0">
+                <div className={`${bgPanel} rounded-xl p-2 sm:p-3 border-t-4 border-t-emerald-500 flex flex-col transition-colors min-h-0`}>
+                  <div className="text-center mb-2 sm:mb-3 shrink-0">
                     <div className={`text-xs font-mono ${bgSubPanel} p-1.5 rounded flex flex-col gap-0.5 font-bold`}>
                       <span className="text-emerald-500">{formatTime(currentStats.timeA)} ({pctA}%)</span>
                       <span className="text-amber-500 text-[0.65rem]">PPM: {m.ppmA}</span>
@@ -486,29 +486,29 @@ export default function Tablero() {
                   
                   <button 
                     onClick={() => handleAction('A', 'pase')}
-                    className="flex-1 min-h-[60px] bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/30 text-emerald-600 font-bold rounded-xl mb-3 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all"
+                    className="flex-1 min-h-[48px] sm:min-h-[60px] bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/30 text-emerald-600 font-bold rounded-xl mb-2 sm:mb-3 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all"
                   >
-                    <span className="text-sm md:text-base leading-tight px-2">{langTexts.passOk}</span>
+                    <span className="text-[0.75rem] md:text-base leading-tight px-1">{langTexts.passOk}</span>
                   </button>
 
-                  <div className={`text-[0.7rem] ${textMain} ${bgSubPanel} p-3 rounded-lg mb-3 shrink-0 transition-colors border ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+                  <div className={`text-[0.65rem] sm:text-[0.7rem] ${textMain} ${bgSubPanel} p-2 sm:p-3 rounded-lg mb-2 sm:mb-3 shrink-0 transition-colors border ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                     <div className="flex justify-between mb-1.5"><span className={textMuted}>{langTexts.passesCompleted}:</span> <b>{currentStats.passesA}</b></div>
                     <div className="flex justify-between mb-1.5"><span className={textMuted}>{langTexts.passesFailed}:</span> <b>{currentStats.failsA}</b></div>
-                    <div className="flex justify-between mb-3"><span className={textMuted}>{langTexts.passEffectiveness}:</span> <b>{m.effPassA}%</b></div>
-                    <div className={`h-px w-full mb-3 ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
+                    <div className="flex justify-between mb-2"><span className={textMuted}>{langTexts.passEffectiveness}:</span> <b>{m.effPassA}%</b></div>
+                    <div className={`h-px w-full mb-2 ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
                     <div className="flex justify-between mb-1.5"><span className={textMuted}>{langTexts.situations}:</span> <b>{currentStats.chancesA}</b></div>
                     <div className="flex justify-between"><span className={textMuted}>{langTexts.goalEffectiveness}:</span> <b>{m.effGoalA}%</b></div>
                   </div>
 
-                  <div className="flex gap-2 shrink-0">
-                    <button onClick={() => handleAction('A', 'chance')} className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.65rem] uppercase">{langTexts.chance}</button>
-                    <button onClick={() => handleAction('A', 'gol')} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.65rem] uppercase">{langTexts.goal}</button>
+                  <div className="flex gap-2 shrink-0 mt-auto">
+                    <button onClick={() => handleAction('A', 'chance')} className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 py-2 sm:py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.6rem] uppercase">{langTexts.chance}</button>
+                    <button onClick={() => handleAction('A', 'gol')} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 sm:py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.6rem] uppercase">{langTexts.goal}</button>
                   </div>
                 </div>
 
                 {/* EQUIPO B */}
-                <div className={`${bgPanel} rounded-xl p-3 border-t-4 border-t-rose-500 flex flex-col transition-colors min-h-0`}>
-                  <div className="text-center mb-3 shrink-0">
+                <div className={`${bgPanel} rounded-xl p-2 sm:p-3 border-t-4 border-t-rose-500 flex flex-col transition-colors min-h-0`}>
+                  <div className="text-center mb-2 sm:mb-3 shrink-0">
                     <div className={`text-xs font-mono ${bgSubPanel} p-1.5 rounded flex flex-col gap-0.5 font-bold`}>
                       <span className="text-rose-500">{formatTime(currentStats.timeB)} ({pctB}%)</span>
                       <span className="text-amber-500 text-[0.65rem]">PPM: {m.ppmB}</span>
@@ -517,23 +517,23 @@ export default function Tablero() {
                   
                   <button 
                     onClick={() => handleAction('B', 'pase')}
-                    className="flex-1 min-h-[60px] bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/30 text-rose-600 font-bold rounded-xl mb-3 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all"
+                    className="flex-1 min-h-[48px] sm:min-h-[60px] bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/30 text-rose-600 font-bold rounded-xl mb-2 sm:mb-3 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all"
                   >
-                    <span className="text-sm md:text-base leading-tight px-2">{langTexts.passOk}</span>
+                    <span className="text-[0.75rem] md:text-base leading-tight px-1">{langTexts.passOk}</span>
                   </button>
 
-                  <div className={`text-[0.7rem] ${textMain} ${bgSubPanel} p-3 rounded-lg mb-3 shrink-0 transition-colors border ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+                  <div className={`text-[0.65rem] sm:text-[0.7rem] ${textMain} ${bgSubPanel} p-2 sm:p-3 rounded-lg mb-2 sm:mb-3 shrink-0 transition-colors border ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                     <div className="flex justify-between mb-1.5"><span className={textMuted}>{langTexts.passesCompleted}:</span> <b>{currentStats.passesB}</b></div>
                     <div className="flex justify-between mb-1.5"><span className={textMuted}>{langTexts.passesFailed}:</span> <b>{currentStats.failsB}</b></div>
-                    <div className="flex justify-between mb-3"><span className={textMuted}>{langTexts.passEffectiveness}:</span> <b>{m.effPassB}%</b></div>
-                    <div className={`h-px w-full mb-3 ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
+                    <div className="flex justify-between mb-2"><span className={textMuted}>{langTexts.passEffectiveness}:</span> <b>{m.effPassB}%</b></div>
+                    <div className={`h-px w-full mb-2 ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
                     <div className="flex justify-between mb-1.5"><span className={textMuted}>{langTexts.situations}:</span> <b>{currentStats.chancesB}</b></div>
                     <div className="flex justify-between"><span className={textMuted}>{langTexts.goalEffectiveness}:</span> <b>{m.effGoalB}%</b></div>
                   </div>
 
-                  <div className="flex gap-2 shrink-0">
-                    <button onClick={() => handleAction('B', 'chance')} className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.65rem] uppercase">{langTexts.chance}</button>
-                    <button onClick={() => handleAction('B', 'gol')} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.65rem] uppercase">{langTexts.goal}</button>
+                  <div className="flex gap-2 shrink-0 mt-auto">
+                    <button onClick={() => handleAction('B', 'chance')} className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 py-2 sm:py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.6rem] uppercase">{langTexts.chance}</button>
+                    <button onClick={() => handleAction('B', 'gol')} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 sm:py-3 rounded-lg flex justify-center items-center active:scale-95 transition-colors font-bold text-[0.6rem] uppercase">{langTexts.goal}</button>
                   </div>
                 </div>
 
@@ -543,20 +543,20 @@ export default function Tablero() {
         </div>
 
         {/* PIE DE PÁGINA */}
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-2 shrink-0 pb-1 sm:pb-0">
           <button 
             onClick={() => { setShowSaveModal(true); setSaveError(''); }} 
-            className={`flex-1 font-bold py-3 rounded-xl flex justify-center items-center gap-2 text-sm transition-colors ${btnPauseClass}`}
+            className={`flex-1 font-bold py-2 sm:py-3 rounded-xl flex justify-center items-center gap-2 text-sm transition-colors ${btnPauseClass}`}
           >
             <Save className="w-4 h-4" /> {langTexts.save}
           </button>
           
           {userSub === 'premium' && (
             <>
-              <button className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl flex justify-center items-center gap-2 text-sm font-bold transition-colors">
+              <button className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 sm:py-3 rounded-xl flex justify-center items-center gap-2 text-sm font-bold transition-colors">
                 <FileText className="w-4 h-4" /> PDF
               </button>
-              <button className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-xl flex justify-center items-center gap-2 text-sm font-bold transition-colors">
+              <button className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-2 sm:py-3 rounded-xl flex justify-center items-center gap-2 text-sm font-bold transition-colors">
                 <Download className="w-4 h-4" /> CSV
               </button>
             </>
