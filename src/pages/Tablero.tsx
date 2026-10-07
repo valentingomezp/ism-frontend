@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause, Save, FileText, Download, CheckCircle2, Sun, Moon, RotateCcw, AlertTriangle, LogOut } from 'lucide-react';
+import { Play, Pause, Save, FileText, Download, Sun, Moon, RotateCcw, AlertTriangle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const initialStats = {
